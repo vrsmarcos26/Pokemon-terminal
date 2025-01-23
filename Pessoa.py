@@ -1,5 +1,7 @@
 from pokemon import *
 import random
+from termcolor import colored
+import time
 
 NOMES = ['Elder Max', 'Rival Leo', 'Sienna', 'Marcos', 'Professor Thorn', 'Bianca', 'Akira',
         'Tess', 'Lucas', 'Ray', 'Serena', 'Hunter', 'Gwen', 'Fiona', 'Orion', 'Kai', 'Dylan']
@@ -19,34 +21,34 @@ POKEMONS = [
     PokemonFantasma("Sableye"),
 ]
 
+def exibir_com_delay(texto, delay=1):
+    """Função para exibir o texto completo com delay após a impressão."""
+    print(texto, end='', flush=True)
+    time.sleep(delay)  # Atraso após a mensagem completa
+
+
 class Pessoa:
 
-    def __init__(self,nome=None,pokemons = [], dinheiro=None):
+    def __init__(self, nome=None, pokemons=None, dinheiro=None):
         if nome:
             self.nome = nome
         else:
             self.nome = random.choice(NOMES)
         
-        self.pokemons = pokemons
+        self.pokemons = pokemons if pokemons else []
 
-        if dinheiro:
-            self.dinheiro = dinheiro
-        else:
-            self.dinheiro = random.randint(1,500)
+        self.dinheiro = dinheiro if dinheiro else random.randint(1, 500)
 
     def __str__(self):
         return f'{self.nome}'
     
     def mostrar_pokemons(self):
-
         if self.pokemons:
             print(f'Pokemons de {self}:')
-            for i,pokemon in enumerate(self.pokemons):
+            for i, pokemon in enumerate(self.pokemons):
                 print(f'Pokemon {i+1}: {pokemon}')
-                
         else:
             print(f'{self} não possui pokemons...')
-
 
     def escolher_pokemon(self):
         if self.pokemons:
@@ -54,20 +56,19 @@ class Pessoa:
             print(f"{self} escolheu {pokemon_escolhido}")
             return pokemon_escolhido
         else:
-            print('ERROR: Esse jogador não possui pokemons.')
+            print(colored('ERROR: Esse jogador não possui pokemons.', 'red'))
 
     def mostrar_dinheiro(self):
         print(f"Você possui ${self.dinheiro} em sua conta")       
 
-    def ganhar_dinheiro(self,quantidade):
+    def ganhar_dinheiro(self, quantidade):
         self.dinheiro += quantidade
-        print(f"Você ganhou $ {quantidade}")
+        print(colored(f"Você ganhou ${quantidade}", 'green'))
         self.mostrar_dinheiro()
-    
 
-
-    def batalhar(self,pessoa):
-        print(f'{self} iniciou uma batalha com {pessoa}')
+    def batalhar(self, pessoa):
+        print(colored(f'{self} iniciou uma batalha com {pessoa}', 'yellow'))
+        time.sleep(1)
 
         pessoa.mostrar_pokemons()
         pokemon_inimigo = pessoa.escolher_pokemon()
@@ -76,27 +77,30 @@ class Pessoa:
 
         if meu_pokemon and pokemon_inimigo:
             while True:
-
+                # Ataque do jogador
+                exibir_com_delay(colored(f"{meu_pokemon} ataca {pokemon_inimigo}!\n", 'red'), delay=1)
                 vitoria = meu_pokemon.atacar(pokemon_inimigo)
                 if vitoria:
-                    print(f"{self} ganhou a batalha!")
+                    exibir_com_delay(colored(f"{self} ganhou a batalha!", 'green'), delay=1)
                     self.ganhar_dinheiro(pokemon_inimigo.level * 20)
                     break
 
+                # Ataque do inimigo
+                exibir_com_delay(colored(f"{pokemon_inimigo} ataca {meu_pokemon}!\n", 'blue'), delay=1)
                 vitoria_inimiga = pokemon_inimigo.atacar(meu_pokemon)
                 if vitoria_inimiga:
-                    print(f"{pessoa} Ganhou a batalha")
+                    exibir_com_delay(colored(f"{pessoa} ganhou a batalha", 'red'), delay=1)
                     break
         else:
-            print('Está batalha não pode ocorrer...')
-
+            print(colored('Está batalha não pode ocorrer...', 'red'))
 
 class Player(Pessoa):
     tipo = 'player'
 
     def capturar(self, pokemon):
         self.pokemons.append(pokemon)
-        print(f"{self} capturou o Pokemon {pokemon}!")
+        time.sleep(1)
+        print(colored(f"Você capturou {pokemon} com sucesso!", 'green'))
 
     def escolher_pokemon(self):
         self.mostrar_pokemons()
@@ -109,12 +113,12 @@ class Player(Pessoa):
                     escolha -= 1
                     pokemon_escolhido = self.pokemons[escolha]
 
-                    print(f'{pokemon_escolhido} eu escolho você!!!')
+                    print(colored(f'{pokemon_escolhido} eu escolho você!!!', 'green'))
                     return pokemon_escolhido
                 except:
-                    print('Escolha inválida')
+                    print(colored('Escolha inválida', 'red'))
         else:
-            print('ERROR: Esse jogador não possui pokemons.')
+            print(colored('ERROR: Esse jogador não possui pokemons.', 'red'))
 
     def explorar(self):
         if random.random() <= 0.3:
@@ -131,25 +135,22 @@ class Player(Pessoa):
                         self.mostrar_pokemons()
                         break
                     else:
-                        print(f'A tentativa de captura falhou. O {pokemon} não foi capturado...')
+                        print(colored(f"A tentativa de captura falhou...", 'red'))
                         
                         if random.random() >= 0.6:
-                            print(f"{pokemon} conseguiu fugir...")
+                            print(colored(f"A tentativa de captura falhou... {pokemon} escapou!", 'red'))
                             break
                         
                         escolha2 = input("Deseja tentar pegar o pokemon novamente? (s/n): ")
                         if escolha2.lower() != 's':
-                            print(f"{pokemon} conseguiu fugir...")
+                            print(colored(f"A tentativa de captura falhou... {pokemon} escapou!", 'red'))
                             break
             elif escolha.lower() == 'n':
                 print("Ok, boa viagem")
             else:
-                print('Escolha inválida ...')
+                print(colored('Escolha inválida ...', 'red'))
         else:
-            print("Exploração sem resultado ...")
-
-
-
+            print(colored("Exploração sem resultado ...", 'yellow'))
 
 class Inimigo(Pessoa):
     tipo = "inimigo"
@@ -163,4 +164,3 @@ class Inimigo(Pessoa):
             super().__init__(nome, pokemons=pokemons_aleatórios)
         else:
             super().__init__(nome, pokemons=pokemons)
-
