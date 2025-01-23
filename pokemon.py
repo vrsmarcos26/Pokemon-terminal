@@ -36,7 +36,7 @@ class PokemonEletrico(Pokemon):
     tipo = 'Elétrico'
 
     def atacar(self, pokemon):
-         print(f'{self} lançou um raio do trovão em {pokemon} e tirou {self.vida}')
+         print(f'{self} lançou um raio do trovão em {pokemon}')
          return super().atacar(pokemon)
 
 class PokemonFogo(Pokemon):
